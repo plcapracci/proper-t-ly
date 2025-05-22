@@ -27,6 +27,7 @@
     "node-ical": "^0.16.0",
     "moment": "^2.29.4",
     "bcrypt": "^5.1.0",
+    "@heroicons/react": "^2.0.18",
     "zod": "^3.21.0"
   },
   "devDependencies": {
