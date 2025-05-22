@@ -84,11 +84,11 @@ export async function POST(request: Request) {
           bookings: airbnbBookings,
           message: `${airbnbBookings} reservas importadas correctamente`,
         };
-      } catch (error) {
+      } catch (error: any) {
         results.airbnb = {
           success: false,
           bookings: 0,
-          message: `Error al sincronizar con Airbnb: ${error.message || 'Error desconocido'}`,
+          message: `Error al sincronizar con Airbnb: ${error?.message || 'Error desconocido'}`,
         };
       }
     }
@@ -130,17 +130,17 @@ export async function POST(request: Request) {
           bookings: bookingBookings,
           message: `${bookingBookings} reservas importadas correctamente`,
         };
-      } catch (error) {
+      } catch (error: any) {
         results.booking = {
           success: false,
           bookings: 0,
-          message: `Error al sincronizar con Booking: ${error.message || 'Error desconocido'}`,
+          message: `Error al sincronizar con Booking: ${error?.message || 'Error desconocido'}`,
         };
       }
     }
     
     return NextResponse.json(results);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error al sincronizar calendarios:', error);
     return NextResponse.json({ error: 'Error al sincronizar calendarios' }, { status: 500 });
   }
