@@ -34,8 +34,8 @@ Portal de gestión de propiedades para propietarios de viviendas. Esta aplicaci�
 
 1. Clona el repositorio:
 ```bash
-git clone https://github.com/tuusuario/propertly.git
-cd propertly
+git clone https://github.com/plcapracci/proper-t-ly.git
+cd proper-t-ly
 ```
 
 2. Instala las dependencias:
@@ -96,4 +96,4 @@ Esta aplicación está configurada para ser desplegada en Vercel.
 
 ## Licencia
 
-Este proyecto está licenciado bajo la Licencia MIT. 
+Este proyecto está licenciado bajo la Licencia MIT.
