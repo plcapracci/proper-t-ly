@@ -11,12 +11,12 @@ moment.locale('es');
 const localizer = momentLocalizer(moment);
 
 interface CalendarEvent {
-  id: number;
+  id: number | string;
   title: string;
   start: Date;
   end: Date;
-  propertyId: number;
-  source: 'airbnb' | 'booking';
+  propertyId: number | string;
+  source: 'airbnb' | 'booking' | 'other';
 }
 
 interface CalendarViewProps {
@@ -28,8 +28,23 @@ export default function CalendarView({ events }: CalendarViewProps) {
 
   // Custom event styling based on source (Airbnb or Booking)
   const eventStyleGetter = (event: CalendarEvent) => {
+    let backgroundColor;
+    
+    switch (event.source) {
+      case 'airbnb':
+        backgroundColor = '#3b82f6'; // blue
+        break;
+      case 'booking':
+        backgroundColor = '#eab308'; // yellow
+        break;
+      case 'other':
+      default:
+        backgroundColor = '#10b981'; // green
+        break;
+    }
+    
     const style = {
-      backgroundColor: event.source === 'airbnb' ? '#3b82f6' : '#eab308',
+      backgroundColor,
       borderRadius: '5px',
       color: '#fff',
       border: 'none',

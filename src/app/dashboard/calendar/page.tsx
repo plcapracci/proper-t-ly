@@ -1,58 +1,70 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/DashboardLayout';
 import CalendarView from '../../components/CalendarView';
+import axios from 'axios';
+
+// Define the proper type for calendar events
+interface CalendarEvent {
+  id: string;  // Changed from number to string for compatibility with Prisma IDs
+  title: string;
+  start: Date;
+  end: Date;
+  propertyId: string;  // Changed from number to string for compatibility with Prisma IDs
+  source: 'airbnb' | 'booking' | 'other';  // Added 'other' as a fallback
+}
+
+// Define property type
+interface Property {
+  id: string;
+  name: string;
+}
 
 export default function CalendarPage() {
-  // Mock data - in a real app, this would come from the backend
-  const [properties] = useState([
-    { id: 1, name: 'Apartamento en Madrid' },
-    { id: 2, name: 'Chalet en Barcelona' },
-    { id: 3, name: 'Piso en Valencia' },
-  ]);
+  // State for properties and events
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [selectedProperty, setSelectedProperty] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  // Mock events - in a real app, these would be loaded from iCal feeds
-  const [events] = useState([
-    {
-      id: 1,
-      title: 'Reserva Airbnb',
-      start: new Date(2023, 10, 10),
-      end: new Date(2023, 10, 15),
-      propertyId: 1,
-      source: 'airbnb',
-    },
-    {
-      id: 2,
-      title: 'Reserva Booking',
-      start: new Date(2023, 10, 18),
-      end: new Date(2023, 10, 22),
-      propertyId: 1,
-      source: 'booking',
-    },
-    {
-      id: 3,
-      title: 'Reserva Airbnb',
-      start: new Date(2023, 10, 5),
-      end: new Date(2023, 10, 12),
-      propertyId: 2,
-      source: 'airbnb',
-    },
-    {
-      id: 4,
-      title: 'Reserva Booking',
-      start: new Date(2023, 10, 25),
-      end: new Date(2023, 10, 30),
-      propertyId: 3,
-      source: 'booking',
-    },
-  ]);
+  // Fetch properties and bookings data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch properties
+        const propertiesResponse = await axios.get('/api/properties');
+        setProperties(propertiesResponse.data);
+        
+        // Fetch bookings
+        const bookingsUrl = selectedProperty 
+          ? `/api/bookings?propertyId=${selectedProperty}`
+          : '/api/bookings';
+        
+        const bookingsResponse = await axios.get(bookingsUrl);
+        
+        // Convert string dates to Date objects
+        const formattedEvents = bookingsResponse.data.map((event: any) => ({
+          ...event,
+          start: new Date(event.start),
+          end: new Date(event.end)
+        }));
+        
+        setEvents(formattedEvents);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, [selectedProperty]);
 
-  const [selectedProperty, setSelectedProperty] = useState<number | null>(null);
-
-  const filteredEvents = selectedProperty
-    ? events.filter(event => event.propertyId === selectedProperty)
-    : events;
+  // Filter events based on selected property (already handled by API query)
+  const filteredEvents = events;
 
   return (
     <DashboardLayout>
@@ -67,10 +79,10 @@ export default function CalendarPage() {
             id="property-select"
             className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
             value={selectedProperty || ''}
-            onChange={(e) => setSelectedProperty(e.target.value ? Number(e.target.value) : null)}
+            onChange={(e) => setSelectedProperty(e.target.value || null)}
           >
             <option value="">Todas las propiedades</option>
-            {properties.map(property => (
+            {properties.map((property) => (
               <option key={property.id} value={property.id}>
                 {property.name}
               </option>
@@ -88,9 +100,19 @@ export default function CalendarPage() {
               <span className="w-4 h-4 bg-yellow-500 rounded-full mr-2"></span>
               <span className="text-sm text-gray-600">Booking</span>
             </div>
+            <div className="flex items-center">
+              <span className="w-4 h-4 bg-green-500 rounded-full mr-2"></span>
+              <span className="text-sm text-gray-600">Otras reservas</span>
+            </div>
           </div>
           
-          <CalendarView events={filteredEvents} />
+          {loading ? (
+            <div className="flex justify-center items-center h-[600px]">
+              <p>Cargando calendario...</p>
+            </div>
+          ) : (
+            <CalendarView events={filteredEvents} />
+          )}
         </div>
       </div>
     </DashboardLayout>
