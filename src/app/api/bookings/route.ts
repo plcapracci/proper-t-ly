@@ -5,6 +5,12 @@ import { authOptions } from '../auth/[...nextauth]/options';
 
 const prisma = new PrismaClient();
 
+// Define types
+interface Property {
+  id: string;
+  name?: string;
+}
+
 // GET /api/bookings - Obtener todas las reservas del usuario
 export async function GET(request: Request) {
   try {
@@ -35,7 +41,7 @@ export async function GET(request: Request) {
       },
     });
     
-    const propertyIds = properties.map(property => property.id);
+    const propertyIds = properties.map((property: Property) => property.id);
     
     whereClause.propertyId = {
       in: propertyIds,
@@ -56,7 +62,7 @@ export async function GET(request: Request) {
     });
     
     // Transform bookings to match the CalendarEvent format expected by the frontend
-    const calendarEvents = bookings.map(booking => ({
+    const calendarEvents = bookings.map((booking: any) => ({
       id: booking.id,
       title: `${booking.guestName || 'Reserva'} - ${booking.property.name}`,
       start: booking.startDate,
