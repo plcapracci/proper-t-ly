@@ -3,7 +3,14 @@ import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../auth/[...nextauth]/options';
 import ical from 'node-ical';
-import { BookingSource } from '@prisma/client';
+
+// Define BookingSource enum to match the schema
+enum BookingSource {
+  AIRBNB = 'AIRBNB',
+  BOOKING = 'BOOKING',
+  DIRECT = 'DIRECT',
+  OTHER = 'OTHER'
+}
 
 const prisma = new PrismaClient();
 
@@ -81,7 +88,7 @@ export async function POST(request: Request) {
         results.airbnb = {
           success: false,
           bookings: 0,
-          message: `Error al sincronizar con Airbnb: ${error.message}`,
+          message: `Error al sincronizar con Airbnb: ${error.message || 'Error desconocido'}`,
         };
       }
     }
@@ -127,7 +134,7 @@ export async function POST(request: Request) {
         results.booking = {
           success: false,
           bookings: 0,
-          message: `Error al sincronizar con Booking: ${error.message}`,
+          message: `Error al sincronizar con Booking: ${error.message || 'Error desconocido'}`,
         };
       }
     }
