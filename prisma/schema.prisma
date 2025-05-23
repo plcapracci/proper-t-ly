@@ -1,0 +1,147 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Usuarios
+model User {
+  id             String          @id @default(cuid())
+  name           String
+  email          String          @unique
+  password       String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  properties     Property[]
+  expenses       Expense[]
+  bankAccounts   BankAccount[]
+  transactions   Transaction[]
+  reports        Report[]
+}
+
+// Propiedades
+model Property {
+  id             String          @id @default(cuid())
+  name           String
+  address        String
+  description    String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  userId         String
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expenses       Expense[]
+  bookings       Booking[]
+  airbnbUrl      String?
+  bookingUrl     String?
+  airbnbIcalUrl  String?
+  bookingIcalUrl String?
+}
+
+// Gastos
+model Expense {
+  id            String          @id @default(cuid())
+  amount        Float
+  date          DateTime
+  description   String
+  category      String
+  provider      String?
+  receiptUrl    String?
+  propertyId    String
+  property      Property        @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  transactionId String?
+  transaction   Transaction?    @relation(fields: [transactionId], references: [id])
+}
+
+// Reservas de propiedades
+model Booking {
+  id          String          @id @default(cuid())
+  startDate   DateTime
+  endDate     DateTime
+  guestName   String?
+  source      BookingSource
+  externalId  String?
+  propertyId  String
+  property    Property        @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  amount      Float?
+}
+
+enum BookingSource {
+  AIRBNB
+  BOOKING
+  DIRECT
+  OTHER
+}
+
+// Cuentas bancarias
+model BankAccount {
+  id           String          @id @default(cuid())
+  name         String
+  accountNumber String
+  bank         String
+  accessToken  String?
+  refreshToken String?
+  userId       String
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+}
+
+// Transacciones bancarias
+model Transaction {
+  id            String          @id @default(cuid())
+  amount        Float
+  date          DateTime
+  description   String
+  category      String?
+  reference     String?
+  bankAccountId String
+  bankAccount   BankAccount     @relation(fields: [bankAccountId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expenses      Expense[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  reconciled    Boolean         @default(false)
+}
+
+// Informes para Hacienda
+model Report {
+  id          String          @id @default(cuid())
+  name        String
+  year        Int
+  quarter     Int?
+  type        ReportType
+  status      ReportStatus    @default(DRAFT)
+  fileUrl     String?
+  userId      String
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+}
+
+enum ReportType {
+  MODELO_303
+  MODELO_130
+  MODELO_100
+  MODELO_210
+  RESUMEN_ANUAL
+}
+
+enum ReportStatus {
+  DRAFT
+  GENERATED
+  SUBMITTED
+} 

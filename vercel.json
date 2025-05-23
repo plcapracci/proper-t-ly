@@ -5,5 +5,8 @@
       "use": "@vercel/next"
     }
   ],
-  "buildCommand": "npm run build"
+  "buildCommand": "npm run build",
+  "env": {
+    "PRISMA_SCHEMA_DISABLE_WARNINGS": "true"
+  }
 } 
