@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../auth/[...nextauth]/options';
 import ical from 'node-ical';
+import { prisma } from '@/lib/prisma';
 
 // Define BookingSource enum to match the schema
 enum BookingSource {
@@ -11,8 +11,6 @@ enum BookingSource {
   DIRECT = 'DIRECT',
   OTHER = 'OTHER'
 }
-
-const prisma = new PrismaClient();
 
 // POST /api/calendar/sync - Sincronizar reservas desde Airbnb y Booking
 export async function POST(request: Request) {

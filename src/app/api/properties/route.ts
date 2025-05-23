@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../auth/[...nextauth]/options';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 // GET /api/properties - Obtener todas las propiedades del usuario
 export async function GET() {

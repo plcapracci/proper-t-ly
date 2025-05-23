@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../auth/[...nextauth]/options';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 // GET /api/expenses - Obtener todos los gastos del usuario
 export async function GET(request: Request) {
